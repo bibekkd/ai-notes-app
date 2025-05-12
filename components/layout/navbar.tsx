@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 
 export function Navbar() {
   const router = useRouter();
@@ -35,8 +35,12 @@ export function Navbar() {
         >
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : null}
-          Sign Out
+          ) : (
+            <>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </>
+          )}
         </Button>
       </div>
     </header>
