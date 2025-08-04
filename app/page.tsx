@@ -74,14 +74,12 @@ const demoPlans = [
 
 function PricingBasic() {
   return (
-    <div className="h-[800px] overflow-y-auto rounded-lg">
-      <Pricing 
-        plans={demoPlans}
-        title="Simple, Transparent Pricing"
-        description={`Choose the plan that works for you. 
-          All plans include access to our platform, lead generation tools, and dedicated support.`}
-      />
-    </div>
+    <Pricing 
+      plans={demoPlans}
+      title="Simple, Transparent Pricing"
+      description={`Choose the plan that works for you. 
+        All plans include access to our platform, lead generation tools, and dedicated support.`}
+    />
   );
 }
 
@@ -444,11 +442,7 @@ export default function HomePage() {
       </section> */}
 
       <Features />
-      <div className='flex items-center justify-center w-full px-4 sm:px-6 md:px-8 lg:px-10 overflow-x-hidden'> 
-        <div className='w-full max-w-auto'>
-          <PricingBasic/>
-        </div>
-      </div>
+      <PricingBasic/>
       <Testimonials/>
 
       <div className='flex items-center justify-center w-full h-full px-4 sm:px-6 md:px-8 lg:px-10'>
