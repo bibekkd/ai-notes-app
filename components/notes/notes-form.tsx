@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,9 @@ import { Card, CardContent, CardFooter} from "@/components/ui/card";
 import { Note } from "@/lib/types";
 import { Label } from "@/components/ui/label";
 import { useSummarize } from "@/lib/hooks/use-summarize";
-import { Loader2, AlertCircle } from "lucide-react";
+import { useSpeechToText } from "@/lib/hooks/use-speech-to-text";
+import { mergeTranscriptIntoContent } from "@/lib/speech/merge-transcript";
+import { Loader2, AlertCircle, Mic, MicOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface NoteFormProps {
@@ -20,12 +22,68 @@ export function NoteForm({ initialData, onSubmit, isSubmitting }: NoteFormProps)
   const [content, setContent] = useState(initialData?.content || "");
   const [summary, setSummary] = useState(initialData?.summary || "");
   const [error, setError] = useState<string | null>(null);
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   
   const summarizeMutation = useSummarize();
+
+  const insertTranscript = (transcript: string) => {
+    const cleanedTranscript = transcript.trim();
+
+    if (!cleanedTranscript) {
+      return;
+    }
+
+    setContent((currentContent) => {
+      const textarea = contentTextareaRef.current;
+      const isActiveTextarea =
+        typeof document !== "undefined" &&
+        textarea !== null &&
+        document.activeElement === textarea;
+
+      const selectionStart = isActiveTextarea
+        ? textarea.selectionStart ?? currentContent.length
+        : currentContent.length;
+      const selectionEnd = isActiveTextarea
+        ? textarea.selectionEnd ?? currentContent.length
+        : currentContent.length;
+      const { nextContent, nextCursorPosition } = mergeTranscriptIntoContent({
+        currentContent,
+        transcript: cleanedTranscript,
+        selectionStart,
+        selectionEnd,
+      });
+
+      if (textarea) {
+        requestAnimationFrame(() => {
+          textarea.focus();
+          textarea.setSelectionRange(nextCursorPosition, nextCursorPosition);
+        });
+      }
+
+      return nextContent;
+    });
+  };
+
+  const {
+    clearError: clearSpeechError,
+    error: speechError,
+    interimTranscript,
+    isListening,
+    isSupported,
+    toggleListening,
+    stopListening,
+  } = useSpeechToText({
+    onTranscript: insertTranscript,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (isListening) {
+      stopListening();
+    }
+
     if (!title.trim()) {
       setError("Title is required");
       return;
@@ -47,9 +105,13 @@ export function NoteForm({ initialData, onSubmit, isSubmitting }: NoteFormProps)
     try {
       const result = await summarizeMutation.mutateAsync(content);
       setSummary(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to summarize:", error);
-      setError(error.message || "Failed to summarize your note. Please try again.");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to summarize your note. Please try again."
+      );
     }
   };
 
@@ -77,8 +139,24 @@ export function NoteForm({ initialData, onSubmit, isSubmitting }: NoteFormProps)
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="content">Content</Label>
+              <Button
+                type="button"
+                variant={isListening ? "destructive" : "outline"}
+                size="sm"
+                onClick={() => {
+                  clearSpeechError();
+                  toggleListening();
+                }}
+                disabled={!isSupported}
+              >
+                {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                {isListening ? "Stop Voice Typing" : "Voice Typing"}
+              </Button>
+            </div>
             <Textarea
+              ref={contentTextareaRef}
               id="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -86,7 +164,32 @@ export function NoteForm({ initialData, onSubmit, isSubmitting }: NoteFormProps)
               className="min-h-[200px] w-full"
               required
             />
+            <p className="text-sm text-muted-foreground">
+              {isSupported
+                ? isListening
+                  ? interimTranscript
+                    ? `Listening: ${interimTranscript}`
+                    : "Listening... start speaking and your words will be added to the note."
+                  : "Use voice typing to dictate directly into your note."
+                : "Voice typing is available in supported browsers such as Chrome and Edge."}
+            </p>
+            {isListening && (
+              <div
+                aria-live="polite"
+                className="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700"
+              >
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-red-500" />
+                Recording from microphone
+              </div>
+            )}
           </div>
+
+          {speechError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{speechError}</AlertDescription>
+            </Alert>
+          )}
           
           {content.trim().length > 0 && (
             <div className="flex justify-end">
