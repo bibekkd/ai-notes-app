@@ -79,6 +79,10 @@ Powered by TanStack Query (React Query) for optimized, scalable, and cache-effic
     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
     NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+    NEXT_PUBLIC_APP_URL=http://localhost:3001
+
+  For Google OAuth with Supabase in local development, also add
+  `http://localhost:3001/auth/callback` to your Supabase Auth Redirect URLs.
 ### 4. Start the development server
     npm run dev
 ## 🧪 Future Improvements
@@ -90,5 +94,4 @@ Powered by TanStack Query (React Query) for optimized, scalable, and cache-effic
 
 ## 📄 License
 MIT License
-
 

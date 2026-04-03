@@ -6,6 +6,11 @@ import type { NextRequest } from 'next/server';
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const next = requestUrl.searchParams.get('next');
+  const safeNextPath =
+    next && next.startsWith('/') && !next.startsWith('//')
+      ? next
+      : '/dashboard';
   
   if (code) {
     const cookieStore = cookies();
@@ -13,5 +18,5 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
   
-  return NextResponse.redirect(new URL('/dashboard', request.url));
+  return NextResponse.redirect(new URL(safeNextPath, request.url));
 }

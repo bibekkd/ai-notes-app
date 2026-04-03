@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getAuthRedirectUrl } from '@/lib/auth/redirect-url';
 
 const loginSchema = z.object({
     email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -42,8 +43,8 @@ export function LoginForm() {
         
         router.push('/dashboard');
         router.refresh();
-        } catch (error: any) {
-        setError(error.message || 'Failed to sign in');
+        } catch (error: unknown) {
+        setError(error instanceof Error ? error.message : 'Failed to sign in');
         } finally {
         setIsLoading(false);
         }
@@ -57,13 +58,13 @@ export function LoginForm() {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
+            redirectTo: getAuthRedirectUrl('/auth/callback', '/dashboard'),
             },
         });
         
         if (error) throw error;
-        } catch (error: any) {
-        setError(error.message || 'Failed to sign in with Google');
+        } catch (error: unknown) {
+        setError(error instanceof Error ? error.message : 'Failed to sign in with Google');
         setIsLoading(false);
         }
     };
