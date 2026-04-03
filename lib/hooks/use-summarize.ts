@@ -12,9 +12,18 @@ export function useSummarize() {
         }
         
         return data.summary;
-      } catch (error: any) {
-        console.error("Summarization error:", error.response?.data || error);
-        throw new Error(error.response?.data?.error || error.message || "Failed to generate summary");
+      } catch (error: unknown) {
+        console.error(
+          "Summarization error:",
+          axios.isAxiosError(error) ? error.response?.data || error.message : error
+        );
+        throw new Error(
+          axios.isAxiosError(error)
+            ? error.response?.data?.error || error.message || "Failed to generate summary"
+            : error instanceof Error
+              ? error.message
+              : "Failed to generate summary"
+        );
       }
     },
   });

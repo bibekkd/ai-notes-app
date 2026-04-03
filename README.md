@@ -12,7 +12,8 @@ Smart Notes is a modern, responsive web application designed to help users creat
 
 ### Backend
 - Supabase – Authentication & Database
-- Gemini API – AI Note Summarization
+- Groq API – Primary AI Note Summarization
+- Mistral API – Fallback AI Note Summarization
 
 ## ✨ Features
 
@@ -26,7 +27,7 @@ Sign up and log in using:
 - Real-time updates and auto-sync with Supabase
 
 ### 🧠 AI Summarization
-- Summarize any note using Google Gemini API
+- Summarize any note using Groq with Mistral fallback support
 - Great for quick recaps and idea digestion
 
 ### ⚡ State Management
@@ -78,13 +79,18 @@ Powered by TanStack Query (React Query) for optimized, scalable, and cache-effic
   
     NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-    NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
-    NEXT_PUBLIC_APP_URL=http://localhost:3001
+    GROQ_API_KEY=your_groq_api_key
+    GROQ_MODEL=llama-3.1-8b-instant
+    MISTRAL_API_KEY=your_mistral_api_key
+    MISTRAL_MODEL=mistral-small-latest
+    NEXT_PUBLIC_APP_URL=http://localhost:3000
 
   For Google OAuth with Supabase in local development, also add
-  `http://localhost:3001/auth/callback` to your Supabase Auth Redirect URLs.
+  `http://localhost:3000/auth/callback` to your Supabase Auth Redirect URLs.
 ### 4. Start the development server
     npm run dev
+### 5. Optional live AI smoke test
+    npm run smoke:ai
 ## 🧪 Future Improvements
   - ✍️ Markdown support for notes
   - 🗂️ Folder and tag-based categorization
@@ -94,4 +100,3 @@ Powered by TanStack Query (React Query) for optimized, scalable, and cache-effic
 
 ## 📄 License
 MIT License
-
