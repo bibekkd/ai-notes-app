@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNotes } from "@/lib/hooks/use-notes";
 import { NoteCard } from "@/components/notes/notes-card";
@@ -165,7 +165,7 @@ export default function DashboardPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteNote} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction onClick={handleDeleteNote} className={buttonVariants({ variant: "destructive" })}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
